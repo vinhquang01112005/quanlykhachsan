@@ -1,0 +1,1949 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hệ thống Quản lý Khách sạn</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", system-ui, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at top, #1d4ed8 0, #020617 55%);
+            color: #e5e7eb;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ===== LOGIN PAGE ===== */
+        #loginPage {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-wrapper {
+            width: 420px;
+            background: rgba(15, 23, 42, 0.98);
+            padding: 32px 34px 30px;
+            border-radius: 22px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+        }
+
+        .login-wrapper h2 {
+            font-size: 26px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .login-sub {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #e5e7eb;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            background: #020617;
+            color: #f9fafb;
+            font-size: 14px;
+            outline: none;
+            transition: border 0.15s, box-shadow 0.15s, background 0.15s;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #6b7280;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.5);
+            background: #020617;
+        }
+
+        .btn {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, #22d3ee, #0ea5e9);
+            color: #0f172a;
+            font-size: 15px;
+            font-weight: 600;
+            box-shadow: 0 12px 40px rgba(8, 47, 73, 0.8);
+            transition: transform 0.12s ease, filter 0.12s ease, box-shadow 0.12s ease;
+        }
+
+        .btn:hover {
+            filter: brightness(1.04);
+            transform: translateY(-1px);
+            box-shadow: 0 18px 50px rgba(8, 47, 73, 0.95);
+        }
+
+        .error {
+            color: #f97373;
+            margin-top: 8px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        /* ===== APP SHELL ===== */
+        #app {
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .app-shell {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(15, 23, 42, 0.98);
+            border-radius: 22px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            padding: 18px 18px 20px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 32px);
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .flex-gap {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn-secondary {
+            background: #020617;
+            color: #e5e7eb;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            box-shadow: none;
+            padding: 7px 11px;
+            font-size: 13px;
+        }
+
+        .btn-sm {
+            padding: 7px 11px;
+            font-size: 13px;
+        }
+
+        .role-pill {
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(56, 189, 248, 0.7);
+            font-size: 12px;
+            color: #38bdf8;
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        .text-muted {
+            color: #9ca3af;
+            font-size: 13px;
+        }
+
+        /* Layout */
+        .layout-main {
+            flex: 1;
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 14px;
+        }
+
+        aside {
+            background: #020617;
+            border-radius: 16px;
+            border: 1px solid rgba(30, 64, 175, 0.85);
+            padding: 12px;
+            font-size: 13px;
+        }
+
+        .nav-section-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #64748b;
+            margin: 8px 0 4px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 7px 9px;
+            border-radius: 9px;
+            border: none;
+            background: transparent;
+            color: #e5e7eb;
+            font-size: 13px;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+            transition: background 0.14s, color 0.14s;
+        }
+
+        .nav-btn span {
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .nav-btn:hover {
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.18), transparent);
+            color: #22d3ee;
+        }
+
+        main {
+            background: #020617;
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            padding: 14px 14px 18px;
+            overflow: auto;
+        }
+
+        h1 {
+            font-size: 22px;
+        }
+
+        h2 {
+            font-size: 17px;
+            margin-bottom: 4px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .stat-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 140px;
+            border-radius: 13px;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            background: radial-gradient(circle at top, rgba(34, 211, 238, 0.12), transparent 60%);
+            padding: 8px 10px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .stat-sub {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 1px;
+        }
+
+        .section {
+            margin-top: 8px;
+            margin-bottom: 10px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 10px;
+        }
+
+        .room-card,
+        .service-card {
+            border-radius: 13px;
+            border: 1px solid rgba(148, 163, 184, 0.47);
+            background: #020617;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .room-img-wrap,
+        .service-img-wrap {
+            width: 100%;
+            height: 130px;
+            overflow: hidden;
+        }
+
+        .room-img-wrap img,
+        .service-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.25s ease;
+        }
+
+        .room-card:hover img,
+        .service-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .room-body,
+        .service-body {
+            padding: 9px 10px 10px;
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .flex-split {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-type {
+            padding: 2px 7px;
+            border-radius: 999px;
+            border: 1px solid rgba(129, 140, 248, 0.85);
+            color: #c7d2fe;
+            font-size: 11px;
+        }
+
+        .badge-status {
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+        }
+
+        .status-available {
+            background: rgba(22, 163, 74, 0.18);
+            border: 1px solid rgba(34, 197, 94, 0.85);
+            color: #4ade80;
+        }
+
+        .status-booked {
+            background: rgba(220, 38, 38, 0.22);
+            border: 1px solid rgba(248, 113, 113, 0.85);
+            color: #fecaca;
+        }
+
+        .price {
+            font-weight: 600;
+            color: #facc15;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        th,
+        td {
+            padding: 6px 8px;
+            border-bottom: 1px solid rgba(31, 41, 55, 0.95);
+            text-align: left;
+        }
+
+        th {
+            font-size: 12px;
+            color: #9ca3af;
+            background: rgba(15, 23, 42, 0.95);
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .tag {
+            padding: 1px 6px;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.75);
+            font-size: 11px;
+        }
+
+        .tag-muted {
+            background: rgba(55, 65, 81, 0.8);
+        }
+
+        /* Payment options */
+        .payment-options {
+            margin-top: 6px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 8px;
+        }
+
+        .payment-card {
+            border-radius: 11px;
+            border: 1px solid rgba(148, 163, 184, 0.6);
+            padding: 8px 8px 9px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            cursor: pointer;
+            background: #020617;
+            transition: border 0.15s, box-shadow 0.15s, background 0.15s;
+        }
+
+        .payment-card:hover {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.5);
+            background: #020617;
+        }
+
+        .payment-card input {
+            width: auto;
+            margin: 0;
+        }
+
+        .payment-logo {
+            width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: #0b1120;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+        }
+
+        .payment-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .payment-text {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .payment-name {
+            font-size: 13px;
+        }
+
+        .payment-sub {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 4px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .star {
+            color: #4b5563;
+        }
+
+        .star.active {
+            color: #facc15;
+        }
+
+        @media (max-width: 900px) {
+            .layout-main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            #app {
+                padding: 8px;
+            }
+
+            .app-shell {
+                border-radius: 0;
+                min-height: 100vh;
+            }
+
+            .login-wrapper {
+                width: 92%;
+                padding: 26px 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== LOGIN ONLY FIRST ===== -->
+    <div id="loginPage">
+        <div class="login-wrapper">
+            <h2>Đăng nhập</h2>
+            <div class="login-sub">Nhập tài khoản để truy cập hệ thống quản lý khách sạn.</div>
+
+            <form id="loginForm">
+                <label for="loginUsername">Tên đăng nhập</label>
+                <input id="loginUsername" type="text" placeholder="Nhập tên đăng nhập">
+
+                <label for="loginPassword">Mật khẩu</label>
+                <input id="loginPassword" type="password" placeholder="Nhập mật khẩu">
+
+                <button class="btn" type="submit">Đăng nhập</button>
+                <div id="loginError" class="error"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== MAIN APP ===== -->
+    <div id="app" class="hidden">
+        <div class="app-shell">
+            <header class="flex-between">
+                <div>
+                    <h1>Hệ thống quản lý khách sạn</h1>
+                    <div class="flex-gap" style="margin-top:6px;">
+                        <div id="currentUserRole" class="role-pill"></div>
+                        <div id="currentUserName" class="text-muted"></div>
+                    </div>
+                </div>
+                <div class="flex-gap">
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="showHelp()">Hướng dẫn</button>
+                    <button type="button" id="logoutBtn" class="btn btn-sm">Đăng xuất</button>
+                </div>
+            </header>
+
+            <div class="layout-main">
+                <!-- SIDEBAR -->
+                <aside>
+                    <div id="customerNav" class="hidden">
+                        <div class="nav-section-title">Khách hàng</div>
+                        <button class="nav-btn active" data-target="customerBookingPanel">
+                            Đặt phòng & thanh toán
+                            <span>Đặt / hủy / thanh toán</span>
+                        </button>
+                        <button class="nav-btn" data-target="customerServicePanel">
+                            Dịch vụ & đánh giá
+                            <span>Yêu cầu / đánh giá</span>
+                        </button>
+                    </div>
+
+                    <div id="staffNav" class="hidden">
+                        <div class="nav-section-title">Nhân viên</div>
+                        <button class="nav-btn" data-target="staffRoomPanel">
+                            Quản lý phòng
+                            <span>Thêm / sửa / trạng thái</span>
+                        </button>
+                        <button class="nav-btn" data-target="staffCustomerPanel">
+                            Khách hàng
+                            <span>Danh sách khách</span>
+                        </button>
+                        <button class="nav-btn" data-target="staffPaymentPanel">
+                            Thanh toán
+                            <span>Đơn & trạng thái</span>
+                        </button>
+                    </div>
+
+                    <div id="managerNav" class="hidden">
+                        <div class="nav-section-title">Quản lý</div>
+                        <button class="nav-btn" data-target="managerHRPanel">
+                            Quản lý nhân sự
+                            <span>Nhân viên</span>
+                        </button>
+                        <button class="nav-btn" data-target="managerAccountPanel">
+                            Tài khoản hệ thống
+                            <span>Phân quyền</span>
+                        </button>
+                        <button class="nav-btn" data-target="managerReportPanel">
+                            Báo cáo & thống kê
+                            <span>Công suất / doanh thu</span>
+                        </button>
+                    </div>
+                </aside>
+
+                <!-- MAIN CONTENT -->
+                <main>
+                    <!-- Khách hàng: đặt phòng & thanh toán -->
+                    <div id="customerBookingPanel">
+                        <div class="panel-header">
+                            <h2>Đặt phòng & thanh toán</h2>
+                            <span class="text-muted">
+                                Tìm kiếm phòng, xem trạng thái, đặt phòng, hủy, nhận trả phòng, thanh toán trực tiếp /
+                                ví điện tử / tài khoản ngân hàng.
+                            </span>
+                        </div>
+
+                        <div class="stat-row" id="roomStatsRow"></div>
+
+                        <div class="section">
+                            <div class="section-title">1. Tìm kiếm & xem phòng</div>
+                            <div class="flex-gap">
+                                <input id="roomSearchInput" type="text" placeholder="Tìm theo tên / loại phòng">
+                                <select id="roomStatusFilter" style="max-width:180px;">
+                                    <option value="all">Tất cả trạng thái</option>
+                                    <option value="available">Chỉ phòng còn trống</option>
+                                    <option value="booked">Chỉ phòng đã bận</option>
+                                </select>
+                            </div>
+                            <p class="text-muted" style="margin-top:6px;font-size:12px;">
+                                Danh sách hiển thị tên phòng, loại, giá niêm yết, trạng thái còn trống / đã bận, hình
+                                ảnh minh họa và tổng số phòng.
+                            </p>
+                        </div>
+
+                        <div class="section">
+                            <div class="section-title">Danh sách phòng</div>
+                            <div id="roomList" class="card-grid"></div>
+                        </div>
+
+                        <div class="section">
+                            <div class="section-title">2. Đặt phòng & chọn phương thức thanh toán</div>
+                            <form id="bookingForm">
+                                <div class="section" style="margin-top:4px;">
+                                    <label>Phòng đang chọn</label>
+                                    <input id="bookingRoomInfo" type="text" disabled
+                                        placeholder="Chưa chọn phòng. Hãy chọn ở danh sách phía trên.">
+                                </div>
+
+                                <div class="section" style="margin-top:2px;">
+                                    <label>Họ tên khách hàng</label>
+                                    <input id="bookingCustomerName" type="text" placeholder="Nhập họ tên của bạn">
+                                </div>
+
+                                <div class="section flex-gap">
+                                    <div style="flex:1;">
+                                        <label>Ngày nhận phòng</label>
+                                        <input id="bookingCheckIn" type="date">
+                                    </div>
+                                    <div style="flex:1;">
+                                        <label>Ngày trả phòng</label>
+                                        <input id="bookingCheckOut" type="date">
+                                    </div>
+                                </div>
+
+                                <!-- Tổng tiền -->
+                                <div class="section">
+                                    <label>Tổng tiền dự kiến</label>
+                                    <input id="bookingTotalAmount" type="text" disabled
+                                        placeholder="Chọn phòng và ngày để tính tổng tiền">
+                                </div>
+
+                                <div class="section">
+                                    <label>Hình thức thanh toán</label>
+                                    <select id="bookingPaymentMethod">
+                                        <option value="direct">Thanh toán trực tiếp tại khách sạn</option>
+                                        <option value="ewallet">Thanh toán qua ví điện tử</option>
+                                        <option value="bank">Thanh toán qua tài khoản ngân hàng</option>
+                                    </select>
+                                </div>
+
+                                <!-- Ví điện tử -->
+                                <div class="section hidden" id="paymentEwalletSection">
+                                    <div class="section-title">Chọn ví điện tử</div>
+                                    <div class="payment-options">
+                                        <label class="payment-card">
+                                            <input type="radio" name="ewalletOption" value="MoMo">
+                                            <div class="payment-logo">
+                                                <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png"
+                                                    alt="MoMo">
+                                            </div>
+                                            <div class="payment-text">
+                                                <span class="payment-name">MoMo</span>
+                                                <span class="payment-sub">Thanh toán nhanh, quét QR</span>
+                                            </div>
+                                        </label>
+                                        <label class="payment-card">
+                                            <input type="radio" name="ewalletOption" value="ZaloPay">
+                                            <div class="payment-logo">
+                                                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/ZaloPay.png"
+                                                    alt="ZaloPay">
+                                            </div>
+                                            <div class="payment-text">
+                                                <span class="payment-name">ZaloPay</span>
+                                                <span class="payment-sub">Liên kết Zalo, nhiều ưu đãi</span>
+                                            </div>
+                                        </label>
+                                        <label class="payment-card">
+                                            <input type="radio" name="ewalletOption" value="ShopeePay">
+                                            <div class="payment-logo">
+                                                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b6/ShopeePay_logo.png"
+                                                    alt="ShopeePay">
+                                            </div>
+                                            <div class="payment-text">
+                                                <span class="payment-name">ShopeePay</span>
+                                                <span class="payment-sub">Hoàn xu, voucher</span>
+                                            </div>
+                                        </label>
+                                        <label class="payment-card">
+                                            <input type="radio" name="ewalletOption" value="VNPay">
+                                            <div class="payment-logo">
+                                                <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/VNPAY_logo.png"
+                                                    alt="VNPay">
+                                            </div>
+                                            <div class="payment-text">
+                                                <span class="payment-name">VNPay</span>
+                                                <span class="payment-sub">Hỗ trợ nhiều ngân hàng</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Ngân hàng -->
+                                <div class="section hidden" id="paymentBankSection">
+                                    <div class="section-title">Chọn tài khoản ngân hàng</div>
+                                    <div class="payment-options">
+                                        <label class="payment-card">
+                                            <input type="radio" name="bankOption" value="Vietcombank - 0123 456 789">
+                                            <div class="payment-logo">
+                                                <span>VCB</span>
+                                            </div>
+                                            <div class="payment-text">
+                                                <span class="payment-name">Vietcombank</span>
+                                                <span class="payment-sub">STK: 0123 456 789 (Ví dụ)</span>
+                                            </div>
+                                        </label>
+                                        <label class="payment-card">
+                                            <input type="radio" name="bankOption" value="Techcombank - 1903 456 789">
+                                            <div class="payment-logo">
+                                                <span>TCB</span>
+                                            </div>
+                                            <div class="payment-text">
+                                                <span class="payment-name">Techcombank</span>
+                                                <span class="payment-sub">STK: 1903 456 789</span>
+                                            </div>
+                                        </label>
+                                        <label class="payment-card">
+                                            <input type="radio" name="bankOption" value="BIDV - 1234 567 890">
+                                            <div class="payment-logo">
+                                                <span>BIDV</span>
+                                            </div>
+                                            <div class="payment-text">
+                                                <span class="payment-name">BIDV</span>
+                                                <span class="payment-sub">STK: 1234 567 890</span>
+                                            </div>
+                                        </label>
+                                        <label class="payment-card">
+                                            <input type="radio" name="bankOption" value="Agribank - 8888 666 555">
+                                            <div class="payment-logo">
+                                                <span>AGB</span>
+                                            </div>
+                                            <div class="payment-text">
+                                                <span class="payment-name">Agribank</span>
+                                                <span class="payment-sub">STK: 8888 666 555</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div id="bookingError" class="error hidden"></div>
+                                <div id="bookingSuccess" class="text-muted hidden"
+                                    style="color:#4ade80;margin-top:6px;">
+                                    Đặt phòng & chọn phương thức thanh toán thành công (demo).
+                                </div>
+
+                                <button type="submit" class="btn" style="margin-top:10px;">Xác nhận đặt phòng</button>
+                            </form>
+                        </div>
+
+                        <div class="section">
+                            <div class="section-title">3. Quản lý đặt phòng</div>
+                            <p class="text-muted" style="font-size:12px;margin-bottom:4px;">
+                                Bảng dưới cho phép xem trạng thái phòng, hủy đặt, đánh dấu nhận phòng và trả phòng.
+                            </p>
+                            <table id="bookingTable">
+                                <thead>
+                                    <tr>
+                                        <th>Mã</th>
+                                        <th>Phòng</th>
+                                        <th>Khách hàng</th>
+                                        <th>Nhận</th>
+                                        <th>Trả</th>
+                                        <th>Thanh toán</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Khách hàng: dịch vụ & đánh giá -->
+                    <div id="customerServicePanel" class="hidden">
+                        <div class="panel-header">
+                            <h2>Dịch vụ, yêu cầu & đánh giá</h2>
+                            <span class="text-muted">Khách hàng có thể gửi yêu cầu dịch vụ và đánh giá chất
+                                lượng.</span>
+                        </div>
+
+                        <div class="section">
+                            <div class="section-title">1. Dịch vụ của khách sạn</div>
+                            <div id="serviceList" class="card-grid"></div>
+                        </div>
+
+                        <div class="section">
+                            <div class="section-title">2. Gửi yêu cầu dịch vụ</div>
+                            <form id="serviceRequestForm">
+                                <div class="section">
+                                    <label>Loại dịch vụ</label>
+                                    <select id="serviceRequestType">
+                                        <option value="spa">Spa & massage</option>
+                                        <option value="restaurant">Đặt bàn nhà hàng</option>
+                                        <option value="laundry">Giặt là</option>
+                                        <option value="pickup">Đưa đón sân bay</option>
+                                        <option value="other">Khác</option>
+                                    </select>
+                                </div>
+                                <div class="section">
+                                    <label>Nội dung yêu cầu</label>
+                                    <textarea id="serviceRequestContent"
+                                        placeholder="Ví dụ: Đặt spa lúc 19h, phòng 502..."></textarea>
+                                </div>
+                                <div id="serviceRequestMessage" class="text-muted hidden"
+                                    style="color:#4ade80;margin-top:4px;">
+                                    Đã gửi yêu cầu dịch vụ (demo).
+                                </div>
+                                <button type="submit" class="btn" style="margin-top:8px;">Gửi yêu cầu</button>
+                            </form>
+                        </div>
+
+                        <div class="section">
+                            <div class="section-title">3. Đánh giá dịch vụ</div>
+                            <form id="ratingForm">
+                                <div class="section">
+                                    <label>Dịch vụ muốn đánh giá</label>
+                                    <select id="ratingServiceSelect"></select>
+                                </div>
+                                <div class="section">
+                                    <label>Đánh giá</label>
+                                    <div id="ratingStars" class="rating-stars">
+                                        <span class="star" data-value="1">★</span>
+                                        <span class="star" data-value="2">★</span>
+                                        <span class="star" data-value="3">★</span>
+                                        <span class="star" data-value="4">★</span>
+                                        <span class="star" data-value="5">★</span>
+                                    </div>
+                                </div>
+                                <div class="section">
+                                    <label>Nhận xét</label>
+                                    <textarea id="ratingComment" placeholder="Nhận xét của bạn..."></textarea>
+                                </div>
+                                <div id="ratingMessage" class="text-muted hidden" style="color:#4ade80;margin-top:4px;">
+                                    Cảm ơn bạn đã đánh giá dịch vụ (demo).
+                                </div>
+                                <button type="submit" class="btn" style="margin-top:8px;">Gửi đánh giá</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Nhân viên: quản lý phòng -->
+                    <div id="staffRoomPanel" class="hidden">
+                        <div class="panel-header">
+                            <h2>Nhân viên - Quản lý phòng</h2>
+                            <span class="text-muted">Quản lý phòng, tiện nghi và trạng thái phòng.</span>
+                        </div>
+
+                        <div class="section">
+                            <div class="section-title">1. Thêm phòng mới</div>
+                            <form id="addRoomForm">
+                                <div class="section flex-gap">
+                                    <div style="flex:1;">
+                                        <label>Tên phòng</label>
+                                        <input id="newRoomName" type="text" placeholder="Phòng Deluxe View biển">
+                                    </div>
+                                    <div style="flex:1;">
+                                        <label>Loại phòng</label>
+                                        <input id="newRoomType" type="text" placeholder="Deluxe / Suite / Standard">
+                                    </div>
+                                </div>
+                                <div class="section flex-gap">
+                                    <div style="flex:1;">
+                                        <label>Giá / đêm (VND)</label>
+                                        <input id="newRoomPrice" type="number" min="0" step="10000"
+                                            placeholder="1500000">
+                                    </div>
+                                    <div style="flex:1;">
+                                        <label>Ảnh phòng (URL)</label>
+                                        <input id="newRoomImage" type="text" placeholder="https://...">
+                                    </div>
+                                </div>
+                                <div id="addRoomMessage" class="text-muted hidden"
+                                    style="color:#4ade80;margin-top:4px;">
+                                    Đã thêm phòng mới (demo).
+                                </div>
+                                <button type="submit" class="btn btn-sm" style="margin-top:8px;">Thêm phòng</button>
+                            </form>
+                        </div>
+
+                        <div class="section">
+                            <div class="section-title">2. Danh sách phòng</div>
+                            <table id="staffRoomTable">
+                                <thead>
+                                    <tr>
+                                        <th>Mã</th>
+                                        <th>Tên phòng</th>
+                                        <th>Loại</th>
+                                        <th>Giá</th>
+                                        <th>Trạng thái</th>
+                                        <th>Tiện nghi</th>
+                                        <th>Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Nhân viên: khách hàng -->
+                    <div id="staffCustomerPanel" class="hidden">
+                        <div class="panel-header">
+                            <h2>Nhân viên - Khách hàng</h2>
+                            <span class="text-muted">Danh sách khách đã / đang đặt phòng.</span>
+                        </div>
+                        <div class="section">
+                            <div class="section-title">Danh sách khách hàng</div>
+                            <table id="staffCustomerTable">
+                                <thead>
+                                    <tr>
+                                        <th>Khách hàng</th>
+                                        <th>Phòng</th>
+                                        <th>Nhận</th>
+                                        <th>Trả</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Nhân viên: thanh toán -->
+                    <div id="staffPaymentPanel" class="hidden">
+                        <div class="panel-header">
+                            <h2>Nhân viên - Thanh toán</h2>
+                            <span class="text-muted">Theo dõi hình thức và trạng thái thanh toán.</span>
+                        </div>
+                        <div class="section">
+                            <div class="section-title">Danh sách thanh toán</div>
+                            <table id="staffPaymentTable">
+                                <thead>
+                                    <tr>
+                                        <th>Mã đặt</th>
+                                        <th>Khách hàng</th>
+                                        <th>Phòng</th>
+                                        <th>Thanh toán</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Quản lý: nhân sự -->
+                    <div id="managerHRPanel" class="hidden">
+                        <div class="panel-header">
+                            <h2>Quản lý - Nhân sự</h2>
+                            <span class="text-muted">Danh sách nhân viên trong hệ thống.</span>
+                        </div>
+                        <div class="section">
+                            <div class="section-title">Nhân sự khách sạn</div>
+                            <table id="managerEmployeeTable">
+                                <thead>
+                                    <tr>
+                                        <th>Họ tên</th>
+                                        <th>Vị trí</th>
+                                        <th>Tài khoản</th>
+                                        <th>Ghi chú</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Quản lý: tài khoản -->
+                    <div id="managerAccountPanel" class="hidden">
+                        <div class="panel-header">
+                            <h2>Quản lý - Tài khoản hệ thống</h2>
+                            <span class="text-muted">Tổng quan các tài khoản: khách hàng, nhân viên, quản lý.</span>
+                        </div>
+                        <div class="section">
+                            <div class="section-title">Danh sách tài khoản</div>
+                            <table id="managerAccountTable">
+                                <thead>
+                                    <tr>
+                                        <th>Tài khoản</th>
+                                        <th>Họ tên</th>
+                                        <th>Vai trò</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Quản lý: báo cáo -->
+                    <div id="managerReportPanel" class="hidden">
+                        <div class="panel-header">
+                            <h2>Quản lý - Báo cáo & thống kê</h2>
+                            <span class="text-muted">Thống kê công suất phòng, số lượt đặt, doanh thu ước tính.</span>
+                        </div>
+                        <div class="stat-row" id="reportStatRow"></div>
+                        <div class="section">
+                            <div class="section-title">Chi tiết đặt phòng</div>
+                            <table id="managerReportTable">
+                                <thead>
+                                    <tr>
+                                        <th>Mã đặt</th>
+                                        <th>Khách</th>
+                                        <th>Phòng</th>
+                                        <th>Nhận</th>
+                                        <th>Trả</th>
+                                        <th>Thanh toán</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== USERS DEMO (KHÔNG HIỂN THỊ TRÊN GIAO DIỆN) =====
+        const users = [
+            { username: "customer1", password: "123", role: "customer", fullName: "Khách hàng demo 1" },
+            { username: "staff1", password: "123", role: "staff", fullName: "Nhân viên lễ tân" },
+            { username: "manager1", password: "123", role: "manager", fullName: "Quản lý khách sạn" }
+        ];
+
+        let currentUser = null;
+        let rooms = [
+            {
+                id: 101,
+                name: "Deluxe City View",
+                type: "Deluxe",
+                price: 1200000,
+                status: "available",
+                amenities: "Giường đôi, view thành phố, buffet sáng",
+                image: "https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg?auto=compress&cs=tinysrgb&w=800"
+            },
+            {
+                id: 102,
+                name: "Suite Sea View",
+                type: "Suite",
+                price: 2200000,
+                status: "available",
+                amenities: "Phòng khách riêng, view biển, mini bar",
+                image: "https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg?auto=compress&cs=tinysrgb&w=800"
+            },
+            {
+                id: 201,
+                name: "Standard Twin",
+                type: "Standard",
+                price: 800000,
+                status: "booked",
+                amenities: "2 giường đơn, phù hợp đi công tác",
+                image: "https://images.pexels.com/photos/271639/pexels-photo-271639.jpeg?auto=compress&cs=tinysrgb&w=800"
+            },
+            {
+                id: 202,
+                name: "Family Room",
+                type: "Family",
+                price: 1600000,
+                status: "available",
+                amenities: "Phòng rộng phù hợp gia đình 4 người",
+                image: "https://images.pexels.com/photos/7512045/pexels-photo-7512045.jpeg?auto=compress&cs=tinysrgb&w=800"
+            },
+            {
+                id: 203,
+                name: "Premium King",
+                type: "Premium",
+                price: 1900000,
+                status: "available",
+                amenities: "Giường king, bàn làm việc, view toàn cảnh thành phố",
+                image: "https://images.pexels.com/photos/6585752/pexels-photo-6585752.jpeg?auto=compress&cs=tinysrgb&w=800"
+            },
+            {
+                id: 204,
+                name: "Superior Garden View",
+                type: "Superior",
+                price: 1400000,
+                status: "available",
+                amenities: "View vườn, ban công nhỏ, không gian yên tĩnh",
+                image: "https://images.pexels.com/photos/262048/pexels-photo-262048.jpeg?auto=compress&cs=tinysrgb&w=800"
+            },
+            {
+                id: 205,
+                name: "Economy Single",
+                type: "Economy",
+                price: 600000,
+                status: "available",
+                amenities: "Giường đơn, phù hợp khách đi công tác ngắn ngày",
+                image: "https://images.pexels.com/photos/6587836/pexels-photo-6587836.jpeg?auto=compress&cs=tinysrgb&w=800"
+            }
+        ];
+
+        const services = [
+            {
+                id: "spa",
+                name: "Spa & Massage",
+                description: "Liệu trình spa thư giãn 60 phút với tinh dầu thiên nhiên.",
+                price: 400000,
+                image: "https://images.pexels.com/photos/3738341/pexels-photo-3738341.jpeg?auto=compress&cs=tinysrgb&w=800"
+            },
+            {
+                id: "restaurant",
+                name: "Nhà hàng Á - Âu",
+                description: "Thực đơn phong phú, phục vụ buffet sáng và gọi món.",
+                price: 250000,
+                image: "https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?auto=compress&cs=tinysrgb&w=800"
+            },
+            {
+                id: "laundry",
+                name: "Giặt là 24/7",
+                description: "Giặt, sấy, là nhanh chóng cho khách lưu trú dài ngày.",
+                price: 80000,
+                image: "https://images.pexels.com/photos/5591535/pexels-photo-5591535.jpeg?auto=compress&cs=tinysrgb&w=800"
+            },
+            {
+                id: "pickup",
+                name: "Đưa đón sân bay",
+                description: "Xe riêng đưa đón sân bay theo giờ yêu cầu.",
+                price: 350000,
+                image: "https://images.pexels.com/photos/210182/pexels-photo-210182.jpeg?auto=compress&cs=tinysrgb&w=800"
+            }
+        ];
+
+        let bookings = []; // {id, roomId, customerName, checkIn, checkOut, paymentMethod, status, nights, totalAmount}
+        let serviceRequests = [];
+        let ratings = [];
+        let selectedRoomId = null;
+        let currentRatingValue = 0;
+
+        // ===== LOGIN =====
+        document.getElementById("loginForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const username = document.getElementById("loginUsername").value.trim();
+            const password = document.getElementById("loginPassword").value.trim();
+            const errorBox = document.getElementById("loginError");
+            errorBox.textContent = "";
+
+            const user = users.find(u => u.username === username && u.password === password);
+            if (!user) {
+                errorBox.textContent = "Sai tên đăng nhập hoặc mật khẩu!";
+                return;
+            }
+
+            currentUser = user;
+            document.getElementById("loginPage").classList.add("hidden");
+            document.getElementById("app").classList.remove("hidden");
+            initAppForUser();
+        });
+
+        document.getElementById("logoutBtn").addEventListener("click", () => {
+            currentUser = null;
+            selectedRoomId = null;
+            currentRatingValue = 0;
+            bookings = [];
+            document.getElementById("app").classList.add("hidden");
+            document.getElementById("loginPage").classList.remove("hidden");
+            document.getElementById("loginForm").reset();
+            document.getElementById("loginError").textContent = "";
+        });
+
+        function initAppForUser() {
+            if (!currentUser) return;
+
+            document.getElementById("currentUserRole").textContent =
+                currentUser.role === "customer"
+                    ? "Khách hàng"
+                    : currentUser.role === "staff"
+                        ? "Nhân viên"
+                        : "Quản lý";
+
+            document.getElementById("currentUserName").textContent =
+                "Đang đăng nhập: " + (currentUser.fullName || currentUser.username);
+
+            document.getElementById("customerNav").classList.add("hidden");
+            document.getElementById("staffNav").classList.add("hidden");
+            document.getElementById("managerNav").classList.add("hidden");
+
+            if (currentUser.role === "customer") {
+                document.getElementById("customerNav").classList.remove("hidden");
+                switchPanel("customerBookingPanel");
+            } else if (currentUser.role === "staff") {
+                document.getElementById("staffNav").classList.remove("hidden");
+                switchPanel("staffRoomPanel");
+            } else {
+                document.getElementById("managerNav").classList.remove("hidden");
+                switchPanel("managerReportPanel");
+            }
+
+            attachNavEvents();
+            renderAll();
+        }
+
+        // ===== NAV/PANELS =====
+        function attachNavEvents() {
+            document.querySelectorAll(".nav-btn").forEach(btn => {
+                btn.onclick = () => {
+                    const target = btn.getAttribute("data-target");
+                    if (target) switchPanel(target);
+                };
+            });
+        }
+
+        const panels = [
+            "customerBookingPanel",
+            "customerServicePanel",
+            "staffRoomPanel",
+            "staffCustomerPanel",
+            "staffPaymentPanel",
+            "managerHRPanel",
+            "managerAccountPanel",
+            "managerReportPanel"
+        ];
+
+        function switchPanel(targetId) {
+            panels.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add("hidden");
+            });
+            const target = document.getElementById(targetId);
+            if (target) target.classList.remove("hidden");
+
+            document.querySelectorAll(".nav-btn").forEach(btn => {
+                if (btn.getAttribute("data-target") === targetId) {
+                    btn.classList.add("active");
+                } else {
+                    btn.classList.remove("active");
+                }
+            });
+
+            renderAll();
+        }
+
+        // ===== RENDER CORE =====
+        function renderAll() {
+            renderRoomStats();
+            renderRoomList();
+            renderBookingTable();
+            renderServiceList();
+            renderRatingServiceSelect();
+            renderStaffRoomTable();
+            renderStaffCustomerTable();
+            renderStaffPaymentTable();
+            renderManagerEmployeeTable();
+            renderManagerAccountTable();
+            renderManagerReport();
+        }
+
+        // ===== ROOM STATS =====
+        function renderRoomStats() {
+            const total = rooms.length;
+            const available = rooms.filter(r => r.status === "available").length;
+            const booked = rooms.filter(r => r.status === "booked").length;
+            const row = document.getElementById("roomStatsRow");
+            if (!row) return;
+            row.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-label">Tổng số phòng</div>
+          <div class="stat-value">${total}</div>
+          <div class="stat-sub">Bao gồm mọi loại phòng</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Phòng còn trống</div>
+          <div class="stat-value">${available}</div>
+          <div class="stat-sub">Khách có thể đặt ngay</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Phòng đã bận</div>
+          <div class="stat-value">${booked}</div>
+          <div class="stat-sub">Đã đặt hoặc đang có khách</div>
+        </div>
+      `;
+        }
+
+        // ===== ROOMS LIST =====
+        function renderRoomList() {
+            const container = document.getElementById("roomList");
+            if (!container) return;
+
+            const searchTerm = (document.getElementById("roomSearchInput")?.value || "").toLowerCase();
+            const statusFilter = document.getElementById("roomStatusFilter")?.value || "all";
+
+            let filtered = rooms.filter(
+                r =>
+                    r.name.toLowerCase().includes(searchTerm) ||
+                    r.type.toLowerCase().includes(searchTerm)
+            );
+
+            if (statusFilter !== "all") {
+                filtered = filtered.filter(r => r.status === statusFilter);
+            }
+
+            if (!filtered.length) {
+                container.innerHTML = `<p class="text-muted">Không tìm thấy phòng phù hợp.</p>`;
+                return;
+            }
+
+            container.innerHTML = filtered
+                .map(
+                    room => `
+        <div class="room-card">
+          <div class="room-img-wrap">
+            <img src="${room.image}" alt="${room.name}">
+          </div>
+          <div class="room-body">
+            <div class="flex-split">
+              <strong>${room.name}</strong>
+              <span class="price">${room.price.toLocaleString("vi-VN")}đ/đêm</span>
+            </div>
+            <div class="flex-split">
+              <span class="badge-type">${room.type}</span>
+              <span class="badge-status ${room.status === "available" ? "status-available" : "status-booked"
+                        }">
+                ${room.status === "available" ? "Còn trống" : "Đã bận"}
+              </span>
+            </div>
+            <div class="text-muted" style="font-size:12px;margin-top:3px;">${room.amenities}</div>
+            <div class="flex-split" style="margin-top:6px;">
+              <button class="btn btn-sm" type="button"
+                ${room.status === "available" ? `onclick="selectRoomForBooking(${room.id})"` : "disabled"}
+              >
+                ${room.status === "available" ? "Chọn để đặt" : "Không thể đặt"}
+              </button>
+              <span class="text-muted" style="font-size:11px;">Mã phòng: ${room.id}</span>
+            </div>
+          </div>
+        </div>
+      `
+                )
+                .join("");
+        }
+
+        function selectRoomForBooking(id) {
+            const room = rooms.find(r => r.id === id);
+            if (!room) return;
+            selectedRoomId = id;
+            document.getElementById("bookingRoomInfo").value =
+                `${room.name} (Mã ${room.id}) - ${room.price.toLocaleString("vi-VN")}đ/đêm`;
+            document.getElementById("bookingError").classList.add("hidden");
+            document.getElementById("bookingSuccess").classList.add("hidden");
+            updateBookingTotal();
+        }
+
+        // Tính số đêm giữa 2 ngày
+        function calculateNights(checkIn, checkOut) {
+            if (!checkIn || !checkOut) return 0;
+            const start = new Date(checkIn);
+            const end = new Date(checkOut);
+            const diffMs = end - start;
+            const diffDays = diffMs / (1000 * 60 * 60 * 24);
+            if (isNaN(diffDays) || diffDays <= 0) return 1; // tối thiểu 1 đêm
+            return Math.round(diffDays);
+        }
+
+        // Cập nhật tổng tiền dự kiến
+        function updateBookingTotal() {
+            const totalInput = document.getElementById("bookingTotalAmount");
+            if (!totalInput) return;
+
+            if (!selectedRoomId) {
+                totalInput.value = "";
+                totalInput.placeholder = "Chọn phòng để tính tổng tiền";
+                return;
+            }
+
+            const room = rooms.find(r => r.id === selectedRoomId);
+            const checkIn = document.getElementById("bookingCheckIn").value;
+            const checkOut = document.getElementById("bookingCheckOut").value;
+
+            if (!checkIn || !checkOut) {
+                totalInput.value = "";
+                totalInput.placeholder = "Chọn ngày nhận/trả để tính tổng tiền";
+                return;
+            }
+
+            const nights = calculateNights(checkIn, checkOut);
+            const total = nights * room.price;
+            totalInput.value = `${total.toLocaleString("vi-VN")}đ (${nights} đêm)`;
+        }
+
+        // Search/filter events
+        document.getElementById("roomSearchInput").addEventListener("input", renderRoomList);
+        document.getElementById("roomStatusFilter").addEventListener("change", renderRoomList);
+        document.getElementById("bookingCheckIn").addEventListener("change", updateBookingTotal);
+        document.getElementById("bookingCheckOut").addEventListener("change", updateBookingTotal);
+
+        // ===== BOOKING & PAYMENT =====
+        document.getElementById("bookingPaymentMethod").addEventListener("change", function () {
+            const method = this.value;
+            const ewalletSection = document.getElementById("paymentEwalletSection");
+            const bankSection = document.getElementById("paymentBankSection");
+            ewalletSection.classList.add("hidden");
+            bankSection.classList.add("hidden");
+
+            if (method === "ewallet") {
+                ewalletSection.classList.remove("hidden");
+            } else if (method === "bank") {
+                bankSection.classList.remove("hidden");
+            }
+        });
+
+        document.getElementById("bookingForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const err = document.getElementById("bookingError");
+            const success = document.getElementById("bookingSuccess");
+            err.classList.add("hidden");
+            success.classList.add("hidden");
+            err.textContent = "";
+
+            if (!selectedRoomId) {
+                err.textContent = "Vui lòng chọn phòng ở danh sách phía trên trước khi đặt.";
+                err.classList.remove("hidden");
+                return;
+            }
+
+            const room = rooms.find(r => r.id === selectedRoomId);
+            if (!room || room.status !== "available") {
+                err.textContent = "Phòng không còn khả dụng.";
+                err.classList.remove("hidden");
+                return;
+            }
+
+            const customerName =
+                document.getElementById("bookingCustomerName").value.trim() ||
+                (currentUser ? currentUser.fullName : "");
+            const checkIn = document.getElementById("bookingCheckIn").value;
+            const checkOut = document.getElementById("bookingCheckOut").value;
+            const method = document.getElementById("bookingPaymentMethod").value;
+
+            if (!customerName || !checkIn || !checkOut) {
+                err.textContent = "Vui lòng nhập họ tên, ngày nhận và ngày trả phòng.";
+                err.classList.remove("hidden");
+                return;
+            }
+
+            const nights = calculateNights(checkIn, checkOut);
+            const totalAmount = nights * room.price;
+
+            let paymentText = "";
+            if (method === "direct") {
+                paymentText = "Thanh toán trực tiếp tại khách sạn";
+            } else if (method === "ewallet") {
+                const selectedWallet = document.querySelector("input[name='ewalletOption']:checked");
+                if (!selectedWallet) {
+                    err.textContent = "Vui lòng chọn ví điện tử để thanh toán.";
+                    err.classList.remove("hidden");
+                    return;
+                }
+                paymentText = "Ví điện tử - " + selectedWallet.value;
+            } else if (method === "bank") {
+                const selectedBank = document.querySelector("input[name='bankOption']:checked");
+                if (!selectedBank) {
+                    err.textContent = "Vui lòng chọn tài khoản ngân hàng để thanh toán.";
+                    err.classList.remove("hidden");
+                    return;
+                }
+                paymentText = "Tài khoản ngân hàng - " + selectedBank.value;
+            }
+
+            const bookingId = bookings.length + 1;
+            bookings.push({
+                id: bookingId,
+                roomId: room.id,
+                customerName,
+                checkIn,
+                checkOut,
+                paymentMethod: paymentText,
+                status: "booked",
+                nights,
+                totalAmount
+            });
+
+            room.status = "booked";
+            renderAll();
+
+            success.classList.remove("hidden");
+            document.getElementById("bookingForm").reset();
+            document.getElementById("bookingRoomInfo").value = "";
+            document.getElementById("bookingTotalAmount").value = "";
+            document.getElementById("bookingTotalAmount").placeholder = "Chọn phòng và ngày để tính tổng tiền";
+            selectedRoomId = null;
+            document.getElementById("paymentEwalletSection").classList.add("hidden");
+            document.getElementById("paymentBankSection").classList.add("hidden");
+        });
+
+        function findBooking(id) {
+            return bookings.find(b => b.id === id);
+        }
+
+        function cancelBooking(id) {
+            const b = findBooking(id);
+            if (!b) return;
+            b.status = "cancelled";
+            const room = rooms.find(r => r.id === b.roomId);
+            if (room) room.status = "available";
+            renderAll();
+        }
+
+        function checkInBooking(id) {
+            const b = findBooking(id);
+            if (!b) return;
+            b.status = "checkedIn";
+            renderAll();
+        }
+
+        function checkOutBooking(id) {
+            const b = findBooking(id);
+            if (!b) return;
+            b.status = "checkedOut";
+            const room = rooms.find(r => r.id === b.roomId);
+            if (room) room.status = "available";
+            renderAll();
+        }
+
+        function renderBookingTable() {
+            const tbody = document.querySelector("#bookingTable tbody");
+            if (!tbody) return;
+            if (!bookings.length) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-muted">Chưa có đặt phòng nào.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = bookings
+                .map(b => {
+                    const room = rooms.find(r => r.id === b.roomId);
+                    let statusLabel = "";
+                    if (b.status === "booked") statusLabel = `<span class="tag">Đã đặt</span>`;
+                    else if (b.status === "checkedIn") statusLabel = `<span class="tag">Đã nhận phòng</span>`;
+                    else if (b.status === "checkedOut") statusLabel = `<span class="tag tag-muted">Đã trả phòng</span>`;
+                    else if (b.status === "cancelled") statusLabel = `<span class="tag tag-muted">Đã hủy</span>`;
+
+                    return `
+          <tr>
+            <td>#${b.id}</td>
+            <td>${room ? room.name : "N/A"}</td>
+            <td>${b.customerName}</td>
+            <td>${b.checkIn || "-"}</td>
+            <td>${b.checkOut || "-"}</td>
+            <td>${b.paymentMethod}</td>
+            <td>${statusLabel}</td>
+            <td>
+              <div class="flex-gap">
+                <button class="btn btn-sm" type="button" onclick="checkInBooking(${b.id})">Nhận</button>
+                <button class="btn btn-sm" type="button" onclick="checkOutBooking(${b.id})">Trả</button>
+                <button class="btn btn-sm btn-secondary" type="button" onclick="cancelBooking(${b.id})">Hủy</button>
+              </div>
+            </td>
+          </tr>`;
+                })
+                .join("");
+        }
+
+        // ===== SERVICES & RATING =====
+        function renderServiceList() {
+            const container = document.getElementById("serviceList");
+            if (!container) return;
+            container.innerHTML = services
+                .map(
+                    s => `
+        <div class="service-card">
+          <div class="service-img-wrap">
+            <img src="${s.image}" alt="${s.name}">
+          </div>
+          <div class="service-body">
+            <div class="flex-split">
+              <strong>${s.name}</strong>
+              <span class="price">${s.price.toLocaleString("vi-VN")}đ</span>
+            </div>
+            <span class="text-muted" style="font-size:12px;">${s.description}</span>
+          </div>
+        </div>`
+                )
+                .join("");
+        }
+
+        document.getElementById("serviceRequestForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const type = document.getElementById("serviceRequestType").value;
+            const content = document.getElementById("serviceRequestContent").value.trim();
+            const msg = document.getElementById("serviceRequestMessage");
+            msg.classList.add("hidden");
+
+            if (!content) {
+                msg.textContent = "Vui lòng nhập nội dung yêu cầu.";
+                msg.style.color = "#f97373";
+                msg.classList.remove("hidden");
+                return;
+            }
+
+            serviceRequests.push({
+                id: serviceRequests.length + 1,
+                type,
+                content,
+                createdAt: new Date().toISOString()
+            });
+
+            msg.textContent = "Đã gửi yêu cầu dịch vụ cho bộ phận lễ tân (demo).";
+            msg.style.color = "#4ade80";
+            msg.classList.remove("hidden");
+            document.getElementById("serviceRequestForm").reset();
+        });
+
+        function renderRatingServiceSelect() {
+            const select = document.getElementById("ratingServiceSelect");
+            if (!select) return;
+            select.innerHTML = services.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
+        }
+
+        function initRatingStars() {
+            const stars = document.querySelectorAll("#ratingStars .star");
+            stars.forEach(star => {
+                star.addEventListener("click", () => {
+                    const value = parseInt(star.getAttribute("data-value"), 10);
+                    currentRatingValue = value;
+                    stars.forEach(s => {
+                        const v = parseInt(s.getAttribute("data-value"), 10);
+                        if (v <= value) s.classList.add("active");
+                        else s.classList.remove("active");
+                    });
+                });
+            });
+        }
+
+        document.getElementById("ratingForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const msg = document.getElementById("ratingMessage");
+            msg.classList.add("hidden");
+            msg.textContent = "";
+
+            if (!currentRatingValue) {
+                msg.textContent = "Vui lòng chọn số sao đánh giá.";
+                msg.style.color = "#f97373";
+                msg.classList.remove("hidden");
+                return;
+            }
+
+            const serviceId = document.getElementById("ratingServiceSelect").value;
+            const comment = document.getElementById("ratingComment").value.trim();
+
+            ratings.push({
+                id: ratings.length + 1,
+                serviceId,
+                rating: currentRatingValue,
+                comment,
+                customer: currentUser ? currentUser.fullName || currentUser.username : "Ẩn danh"
+            });
+
+            msg.textContent = "Cảm ơn bạn đã đánh giá dịch vụ (demo).";
+            msg.style.color = "#4ade80";
+            msg.classList.remove("hidden");
+            document.getElementById("ratingForm").reset();
+            currentRatingValue = 0;
+            document.querySelectorAll("#ratingStars .star").forEach(s => s.classList.remove("active"));
+        });
+
+        // ===== STAFF: ROOMS =====
+        function renderStaffRoomTable() {
+            const tbody = document.querySelector("#staffRoomTable tbody");
+            if (!tbody) return;
+            if (!rooms.length) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-muted">Chưa có phòng nào.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = rooms
+                .map(
+                    r => `
+        <tr>
+          <td>${r.id}</td>
+          <td>${r.name}</td>
+          <td>${r.type}</td>
+          <td>${r.price.toLocaleString("vi-VN")}đ</td>
+          <td>${r.status === "available" ? "Còn trống" : "Đã bận"}</td>
+          <td>${r.amenities}</td>
+          <td>
+            <button class="btn btn-sm" type="button" onclick="toggleRoomStatus(${r.id})">
+              Đổi trạng thái
+            </button>
+          </td>
+        </tr>`
+                )
+                .join("");
+        }
+
+        function toggleRoomStatus(id) {
+            const room = rooms.find(r => r.id === id);
+            if (!room) return;
+            room.status = room.status === "available" ? "booked" : "available";
+            renderAll();
+        }
+
+        document.getElementById("addRoomForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const name = document.getElementById("newRoomName").value.trim();
+            const type = document.getElementById("newRoomType").value.trim();
+            const priceVal = document.getElementById("newRoomPrice").value.trim();
+            const image = document.getElementById("newRoomImage").value.trim();
+            const msg = document.getElementById("addRoomMessage");
+
+            msg.classList.add("hidden");
+            msg.textContent = "";
+
+            if (!name || !type || !priceVal) {
+                msg.textContent = "Vui lòng nhập tên phòng, loại phòng và giá.";
+                msg.style.color = "#f97373";
+                msg.classList.remove("hidden");
+                return;
+            }
+
+            const price = parseInt(priceVal, 10) || 0;
+            const newId = (rooms[rooms.length - 1]?.id || 100) + 1;
+            rooms.push({
+                id: newId,
+                name,
+                type,
+                price,
+                status: "available",
+                amenities: "Tiện nghi tiêu chuẩn (vừa thêm).",
+                image:
+                    image ||
+                    "https://images.pexels.com/photos/271639/pexels-photo-271639.jpeg?auto=compress&cs=tinysrgb&w=800"
+            });
+
+            msg.textContent = "Đã thêm phòng mới (demo).";
+            msg.style.color = "#4ade80";
+            msg.classList.remove("hidden");
+            document.getElementById("addRoomForm").reset();
+            renderAll();
+        });
+
+        // ===== STAFF: CUSTOMERS & PAYMENTS =====
+        function renderStaffCustomerTable() {
+            const tbody = document.querySelector("#staffCustomerTable tbody");
+            if (!tbody) return;
+            if (!bookings.length) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-muted">Chưa có khách hàng đặt phòng.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = bookings
+                .map(b => {
+                    const room = rooms.find(r => r.id === b.roomId);
+                    let statusText = "";
+                    if (b.status === "booked") statusText = "Đã đặt";
+                    else if (b.status === "checkedIn") statusText = "Đang ở";
+                    else if (b.status === "checkedOut") statusText = "Đã trả";
+                    else if (b.status === "cancelled") statusText = "Đã hủy";
+                    return `
+          <tr>
+            <td>${b.customerName}</td>
+            <td>${room ? room.name : "N/A"}</td>
+            <td>${b.checkIn || "-"}</td>
+            <td>${b.checkOut || "-"}</td>
+            <td>${statusText}</td>
+          </tr>`;
+                })
+                .join("");
+        }
+
+        function renderStaffPaymentTable() {
+            const tbody = document.querySelector("#staffPaymentTable tbody");
+            if (!tbody) return;
+            if (!bookings.length) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-muted">Chưa có giao dịch thanh toán.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = bookings
+                .map(b => {
+                    const room = rooms.find(r => r.id === b.roomId);
+                    let st = "";
+                    if (b.status === "booked") st = "Chờ nhận phòng";
+                    else if (b.status === "checkedIn") st = "Đang ở";
+                    else if (b.status === "checkedOut") st = "Hoàn tất";
+                    else if (b.status === "cancelled") st = "Đã hủy";
+                    return `
+          <tr>
+            <td>#${b.id}</td>
+            <td>${b.customerName}</td>
+            <td>${room ? room.name : "N/A"}</td>
+            <td>${b.paymentMethod}</td>
+            <td>${st}</td>
+          </tr>`;
+                })
+                .join("");
+        }
+
+        // ===== MANAGER: HR & ACCOUNTS & REPORT =====
+        function renderManagerEmployeeTable() {
+            const tbody = document.querySelector("#managerEmployeeTable tbody");
+            if (!tbody) return;
+            const employees = users.filter(u => u.role === "staff");
+            if (!employees.length) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-muted">Chưa có nhân viên.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = employees
+                .map(
+                    e => `
+        <tr>
+          <td>${e.fullName || "-"}</td>
+          <td>Nhân viên khách sạn</td>
+          <td>${e.username}</td>
+          <td>Lễ tân / CSKH</td>
+        </tr>`
+                )
+                .join("");
+        }
+
+        function renderManagerAccountTable() {
+            const tbody = document.querySelector("#managerAccountTable tbody");
+            if (!tbody) return;
+            if (!users.length) {
+                tbody.innerHTML = `<tr><td colspan="3" class="text-muted">Chưa có tài khoản.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = users
+                .map(
+                    u => `
+        <tr>
+          <td>${u.username}</td>
+          <td>${u.fullName || "-"}</td>
+          <td>${u.role === "customer" ? "Khách hàng" : u.role === "staff" ? "Nhân viên" : "Quản lý"}</td>
+        </tr>`
+                )
+                .join("");
+        }
+
+        function renderManagerReport() {
+            const statRow = document.getElementById("reportStatRow");
+            if (!statRow) return;
+
+            const totalRooms = rooms.length;
+            const bookedRooms = rooms.filter(r => r.status === "booked").length;
+            const availableRooms = rooms.filter(r => r.status === "available").length;
+            const totalBooking = bookings.length;
+            const estimatedRevenue = bookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
+
+            statRow.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-label">Tổng số phòng</div>
+          <div class="stat-value">${totalRooms}</div>
+          <div class="stat-sub">Trống: ${availableRooms} • Bận: ${bookedRooms}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Số lượt đặt</div>
+          <div class="stat-value">${totalBooking}</div>
+          <div class="stat-sub">Tính toàn thời gian (demo)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Doanh thu ước tính</div>
+          <div class="stat-value">${estimatedRevenue.toLocaleString("vi-VN")}đ</div>
+          <div class="stat-sub">Tổng tiền theo số đêm đã đặt (demo)</div>
+        </div>
+      `;
+
+            const tbody = document.querySelector("#managerReportTable tbody");
+            if (!tbody) return;
+            if (!bookings.length) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-muted">Chưa có dữ liệu đặt phòng.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = bookings
+                .map(b => {
+                    const room = rooms.find(r => r.id === b.roomId);
+                    let st = "";
+                    if (b.status === "booked") st = "Đã đặt";
+                    else if (b.status === "checkedIn") st = "Đang ở";
+                    else if (b.status === "checkedOut") st = "Đã trả";
+                    else if (b.status === "cancelled") st = "Đã hủy";
+                    return `
+          <tr>
+            <td>#${b.id}</td>
+            <td>${b.customerName}</td>
+            <td>${room ? room.name : "N/A"}</td>
+            <td>${b.checkIn || "-"}</td>
+            <td>${b.checkOut || "-"}</td>
+            <td>${b.paymentMethod}</td>
+            <td>${(b.totalAmount || 0).toLocaleString("vi-VN")}đ</td>
+            <td>${st}</td>
+          </tr>`;
+                })
+                .join("");
+        }
+
+        // ===== HELP =====
+        function showHelp() {
+            alert(
+                "TÀI KHOẢN DEMO (chỉ dùng để test, không hiển thị trên giao diện):\n\n" +
+                "• Khách hàng: customer1 / 123\n" +
+                "• Nhân viên:  staff1 / 123\n" +
+                "• Quản lý:    manager1 / 123\n\n" +
+                "Khách hàng: đặt phòng, chọn thanh toán trực tiếp / ví điện tử / ngân hàng, hủy, nhận, trả phòng, gửi yêu cầu & đánh giá.\n" +
+                "Nhân viên: quản lý phòng, khách hàng, thanh toán.\n" +
+                "Quản lý: xem nhân sự, tài khoản, báo cáo thống kê."
+            );
+        }
+
+        // ===== INIT =====
+        initRatingStars();
+    </script>
+</body>
+
+</html>
